@@ -36,7 +36,13 @@ This project provisions an AWS infrastructure to:
 
 2. Install dependencies:
 
-   npm install
+   sudo npm i -g aws-cdk-lib
+
+   mkdir aws-cdk && cd aws-cdk
+
+   cdk init app --language typescript
+
+   cdk ls 
 
 
 3. Bootstrap your AWS environment (if not already done):

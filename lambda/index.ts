@@ -1,82 +1,73 @@
-import { S3Handler } from 'aws-lambda';
-import * as AWS from 'aws-sdk';
-import * as csvParser from 'csv-stringify';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Event } from 'aws-lambda';
+import * as csv from 'fast-csv';
 
-const s3 = new AWS.S3();
-const bucketName = process.env.BUCKET_NAME!;
-const metadataFolder = process.env.METADATA_FOLDER!;
+const s3Client = new S3Client({}); // Uses default configuration
+const bucketName = process.env.BUCKET_NAME || '';
+const metadataFolder = process.env.METADATA_FOLDER || '';
 
-export const handler: S3Handler = async (event) => {
+if (!bucketName || !metadataFolder) {
+  throw new Error('Environment variables BUCKET_NAME and METADATA_FOLDER must be set.');
+}
+
+export const handler = async (event: S3Event): Promise<void> => {
   try {
-    console.log('Received S3 event:', JSON.stringify(event, null, 2));
+    console.log('Received S3 Event:', JSON.stringify(event, null, 2));
 
     for (const record of event.Records) {
-      const objectKey = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
-      const uploadDate = new Date().toISOString();
+      const s3ObjectKey = record.s3.object.key;
+      const bucket = record.s3.bucket.name;
 
-      if (!objectKey.startsWith('audiofiles/')) {
-        console.log('Skipping non-audio file:', objectKey);
+      console.log(`Processing file: ${s3ObjectKey} from bucket: ${bucket}`);
+
+      // Extract file name from the S3 key
+      const fileName = s3ObjectKey.split('/').pop(); // Get the last part of the key
+      if (!fileName) {
+        console.error(`Could not extract file name from key: ${s3ObjectKey}`);
         continue;
       }
 
-      const relativeKey = objectKey.replace('audiofiles/', '');
-      const [clientId, year, month, day, fileName] = relativeKey.split('/');
+      // Extract client ID (assumes the second part of the path is the client ID)
+      const filePathParts = s3ObjectKey.split('/');
+      const clientId = filePathParts.length > 1 ? filePathParts[1] : 'unknown_client';
+
       const metadata = {
+        fileName, // Include the actual file name
+        uploadTimestamp: new Date().toISOString(),
         clientId,
-        year,
-        month,
-        day,
-        fileName,
-        uploadDate,
       };
 
-      console.log('Extracted Metadata:', metadata);
+      console.log('Extracted metadata:', metadata);
 
-      const metadataFileKey = `${metadataFolder}/metadata.csv`;
-
-      let existingData: string[][] = [];
-      try {
-        const response = await s3
-          .getObject({
-            Bucket: bucketName,
-            Key: metadataFileKey,
-          })
-          .promise();
-
-        const fileContent = response.Body!.toString('utf-8');
-        existingData = fileContent
-          .split('\n')
-          .filter((line) => line.trim())
-          .map((line) => line.split(','));
-      } catch (err) {
-        if (err.code !== 'NoSuchKey') {
-          throw err;
-        }
-        console.log('Metadata CSV file does not exist. Creating a new one.');
-      }
-
-      existingData.push(Object.values(metadata));
-
-      const csvContent = await new Promise<string>((resolve, reject) => {
-        csvParser(existingData, { delimiter: ',' }, (err, output) => {
-          if (err) return reject(err);
-          resolve(output);
-        });
+      // Generate CSV content
+      const csvData = [['fileName', 'uploadTimestamp', 'clientId'], [metadata.fileName, metadata.uploadTimestamp, metadata.clientId]];
+      const csvBuffer: Buffer = await new Promise((resolve, reject) => {
+        const buffers: Buffer[] = [];
+        csv.write(csvData, { headers: true })
+          .on('data', (chunk: Buffer) => buffers.push(chunk))
+          .on('end', () => resolve(Buffer.concat(buffers)))
+          .on('error', reject);
       });
 
-      await s3
-        .putObject({
-          Bucket: bucketName,
-          Key: metadataFileKey,
-          Body: csvContent,
-          ContentType: 'text/csv',
-        })
-        .promise();
+      // Generate metadata file name
+      const metadataFileName = `${metadataFolder}${clientId}/${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getDate()).padStart(2, '0')}/metadata-${Date.now()}.csv`;
 
-      console.log('Metadata CSV file updated successfully.');
+      // Upload CSV to the metadata folder
+      const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: metadataFileName,
+        Body: csvBuffer,
+        ContentType: 'text/csv',
+      });
+
+      await s3Client.send(command);
+
+      console.log(`Metadata written to ${metadataFileName}`);
     }
+
+    console.log('Metadata processed successfully.');
   } catch (error) {
     console.error('Error processing S3 event:', error);
-    throw error;
+    throw new Error('Failed to process S3 event');
   }
 };
