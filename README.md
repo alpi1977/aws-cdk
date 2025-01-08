@@ -38,7 +38,7 @@ The architecture for this application is shown below:
 
 This project uses the following AWS services:
 1. **Amazon S3**:
-   - Stores uploaded audio files.
+   - S3 Bucket stores uploaded audio files.
    - Stores the `metadata.csv` file for metadata aggregation.
 2. **AWS Lambda**:
    - Processes S3 events triggered by file uploads.
@@ -123,7 +123,7 @@ cdk deploy
 ```
 
 This command provisions the following AWS resources:
-- An S3 bucket for storing audio files and the `metadata.csv`.
+- An S3 bucket and its folders "audiofiles" and "metadata" for storing audio files and the `metadata.csv`.
 - A Lambda function triggered by S3 events to process uploaded audio files.
 - Necessary IAM roles and policies.
 
@@ -131,7 +131,7 @@ This command provisions the following AWS resources:
 
 ## **Using the Application**
 1. **Upload an Audio File**:
-   - Upload an audio file (e.g., `audiofiles/client1/example.mp3`) to the designated folder in the S3 bucket.
+   - Upload manualy an audio file (e.g., `audiofiles/client1/YYYY/MM/DD/example.mp3`) to the designated folder in the S3 bucket.
 
 2. **View the Metadata**:
    - The metadata of the uploaded file is appended to `metadata.csv` in the `metadata/` folder of the same S3 bucket.
