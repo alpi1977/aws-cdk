@@ -3,24 +3,24 @@
 
 This AWS CDK application automates the processing of audio files uploaded to an S3 bucket. When an audio file is uploaded, the application extracts metadata (e.g., file name, upload timestamp, and client ID), appends it to a `metadata.csv` file in the same S3 bucket, and supports querying metadata records programmatically.
 
+---
 
-aws-cdk/
-├── bin/
-│   └── cdk-app.ts            # Entry point for the CDK application
-├── lib/
-│   └── cdk-app-stack.ts      # CDK stack definition
-├── lambda/
-│   └── index.ts              # Lambda function for processing audio files
-├── test/
-│   └── cdk-app.test.ts       # Unit tests
-├── cdk-app.png               # Architecture diagram for the project
-├── node_modules/             # Node.js dependencies (auto-generated)
-├── cdk.json                  # CDK configuration file
-├── package.json              # Project dependencies and scripts
-├── package-lock.json         # Locked versions of dependencies
-├── tsconfig.json             # TypeScript configuration
-└── README.md                 # Project documentation
+## **Architecture**
+The architecture for this AWS CDK Application is shown below:
 
+![Architecture Diagram](cdk-app.png)
+
+This project uses the following AWS services:
+1. **Amazon S3**:
+   - S3 Bucket stores uploaded audio files.
+   - Stores the `metadata.csv` file for metadata aggregation.
+2. **AWS Lambda**:
+   - Processes S3 events triggered by file uploads.
+   - Extracts and appends metadata to the CSV file.
+3. **IAM**:
+   - Enforces least-privilege access for Lambda to interact with the S3 bucket.
+4. **AWS CDK**:
+   - Provisions the infrastructure and automates deployment.
 
 ---
 
@@ -48,24 +48,6 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
 - **Code Bundling**: AWS CDK automatically handles Lambda function asset bundling.
 - **Environment Bootstrapping**: CDK simplifies bootstrapping for permissions required by the deployment process.
 
----
-
-## **Architecture**
-The architecture for this application is shown below:
-
-![Architecture Diagram](cdk-app.png)
-
-This project uses the following AWS services:
-1. **Amazon S3**:
-   - S3 Bucket stores uploaded audio files.
-   - Stores the `metadata.csv` file for metadata aggregation.
-2. **AWS Lambda**:
-   - Processes S3 events triggered by file uploads.
-   - Extracts and appends metadata to the CSV file.
-3. **IAM**:
-   - Enforces least-privilege access for Lambda to interact with the S3 bucket.
-4. **AWS CDK**:
-   - Provisions the infrastructure and automates deployment.
 
 ---
 
