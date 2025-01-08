@@ -3,6 +3,25 @@
 
 This AWS CDK application automates the processing of audio files uploaded to an S3 bucket. When an audio file is uploaded, the application extracts metadata (e.g., file name, upload timestamp, and client ID), appends it to a `metadata.csv` file in the same S3 bucket, and supports querying metadata records programmatically.
 
+
+aws-cdk/
+├── bin/
+│   └── cdk-app.ts            # Entry point for the CDK application
+├── lib/
+│   └── cdk-app-stack.ts      # CDK stack definition
+├── lambda/
+│   └── index.ts              # Lambda function for processing audio files
+├── test/
+│   └── cdk-app.test.ts       # Unit tests
+├── cdk-app.png               # Architecture diagram for the project
+├── node_modules/             # Node.js dependencies (auto-generated)
+├── cdk.json                  # CDK configuration file
+├── package.json              # Project dependencies and scripts
+├── package-lock.json         # Locked versions of dependencies
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # Project documentation
+
+
 ---
 
 ## **Key Considerations**
