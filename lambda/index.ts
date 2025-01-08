@@ -51,6 +51,12 @@ export const handler = async (event: S3Event): Promise<void> => {
       ClientID: getClientID(audioFileKey), // Extract client ID from the file path
     };
 
+    // Ensure the uploaded file is an MP3
+    if (!newMetadata.FileName.endsWith('.mp3')) {
+      console.warn(`Skipping non-MP3 file: ${audioFileKey}`);
+      continue;
+    }
+
     let rows: { FileName: string; UploadTimestamp: string; ClientID: string }[] = [];
     const headers = ['FileName', 'UploadTimestamp', 'ClientID'];
 
@@ -63,8 +69,8 @@ export const handler = async (event: S3Event): Promise<void> => {
         csvParser
           .parseString(metadataCsv, { headers: true })
           .on('data', row => {
-            // Only add valid rows
-            if (row.FileName && row.UploadTimestamp && row.ClientID) {
+            // Only include rows with valid MP3 files
+            if (row.FileName && row.FileName.endsWith('.mp3')) {
               rows.push(row);
             }
           })
