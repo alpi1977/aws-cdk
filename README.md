@@ -32,7 +32,10 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
 ---
 
 ## **Architecture**
-<!-- Insert your architecture diagram here -->
+The architecture for this application is shown below:
+
+![Architecture Diagram](cdk-app.png)
+
 This project uses the following AWS services:
 1. **Amazon S3**:
    - Stores uploaded audio files.

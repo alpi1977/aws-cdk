@@ -41,11 +41,29 @@ export class AudioFileIndexingStack extends cdk.Stack {
     // Grant S3 permissions to Lambda
     bucket.grantReadWrite(lambdaRole);
 
-    // Lambda Function
+    // Lambda Function with local bundling
     const lambdaFunction = new lambda.Function(this, 'MetadataExtractorLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambda'),
+      code: lambda.Code.fromAsset('lambda', {
+        bundling: {
+          local: {
+            tryBundle: (outputDir: string) => {
+              const { execSync } = require('child_process');
+              try {
+                // Use esbuild for local bundling
+                execSync('esbuild --version'); // Check if esbuild is installed globally
+                execSync(`esbuild lambda/index.ts --bundle --platform=node --target=node18 --outfile=${outputDir}/index.js`);
+                return true; // Local bundling was successful
+              } catch (error) {
+                console.error('Local bundling failed:', error);
+                return false; // Fallback to no bundling
+              }
+            },
+          },
+          image: lambda.Runtime.NODEJS_18_X.bundlingImage, // Placeholder for required field
+        },
+      }),
       environment: {
         BUCKET_NAME: bucket.bucketName,
         METADATA_FOLDER: 'metadata/',
