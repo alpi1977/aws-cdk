@@ -74,7 +74,7 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
    ```
 
 3. **AWS CDK**:
-   Install AWS CDK globally:
+   Install AWS CDK globally and run reqired cdk commands:
    ```bash
    npm install -g aws-cdk
    ```
@@ -82,11 +82,11 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
    ```bash
    cdk --version
    ```
-   initialize the application
+   initialize the application:
    ```bash
    cdk init app --language typescript
    ```
-   verify it works correctly
+   verify it works correctly:
    ```bash
    cdk ls
    ```
@@ -94,7 +94,7 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
    (use a file editor vi or nano to do that)
 
    
-   setup the Lambda function
+   setup the Lambda function:
    ```bash
    mkdir lambda && cd lambda
    touch index.ts
