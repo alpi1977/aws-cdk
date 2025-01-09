@@ -82,6 +82,23 @@ This project avoids reinventing the wheel by fully utilizing AWS CDK's capabilit
    ```bash
    cdk --version
    ```
+   initialize the application
+   ```bash
+   cdk init app --language typescript
+   ```
+   verify it works correctly
+   ```bash
+   cdk ls
+   ```
+   copy the content of cdk-app-stack.js into lib/cdk-app-stack.js
+   (use a file editor vi or nano to do that)
+
+   
+   setup the Lambda function
+   ```bash
+   mkdir lambda && cd lambda
+   touch index.ts
+   ```
 
 4. **AWS Account**:
    Ensure you have access to an AWS account with permissions to create S3, Lambda, and IAM resources.
@@ -112,9 +129,12 @@ Before deploying the stack, bootstrap your AWS environment (only required once p
 ```bash
 cdk bootstrap aws://<AWS_ACCOUNT_ID>/<AWS_REGION>
 ```
-
 Replace `<AWS_ACCOUNT_ID>` and `<AWS_REGION>` with your account ID and preferred region (e.g., `us-east-1`).
 
+(Optional) synthesize as a CloudFormation template:
+```bash
+cdk synth
+```
 ---
 
 ## **Deploying the Application**
